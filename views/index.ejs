@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Currículo — Crie seu currículo em segundos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav id="nav">
+  <div class="nav-logo">Currículo</div>
+  <a href="/curriculo" class="nav-cta">Criar agora</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">Rápido, simples e gratuito</p>
+  <h1 class="hero-title">Seu currículo<br><em>pronto</em><br>em segundos.</h1>
+  <p class="hero-sub">Preencha um formulário simples e baixe seu currículo em PDF.</p>
+  <div class="hero-actions">
+    <a href="/curriculo" class="btn-primary">
+      Criar meu currículo <span class="arrow">→</span>
+    </a>
+    <span class="hero-note">Grátis · Sem cadastro</span>
+  </div>
+  <div class="hero-deco">CV</div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <p class="features-label">Por que usar</p>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-num">01</div>
+      <div class="feature-title">Simples e direto</div>
+      <p class="feature-desc">Preencha os campos com suas informações e seu currículo é montado automaticamente, sem complicação.</p>
+    </div>
+    <div class="feature-card reveal" style="transition-delay: 0.1s">
+      <div class="feature-num">02</div>
+      <div class="feature-title">Download em PDF</div>
+      <p class="feature-desc">Baixe seu currículo em formato PDF profissional direto no navegador, sem precisar criar conta.</p>
+    </div>
+    <div class="feature-card reveal" style="transition-delay: 0.2s">
+      <div class="feature-num">03</div>
+      <div class="feature-title">3 idiomas</div>
+      <p class="feature-desc">Gere seu currículo em português, inglês ou espanhol, pronto para o mercado internacional.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="reveal">
+    <p class="how-label">Como funciona</p>
+    <h2>Simples assim.</h2>
+    <p>Sem templates complicados, sem assinatura. Você preenche e baixa em PDF.</p>
+    <a href="/curriculo" class="btn-primary">Começar agora <span class="arrow">→</span></a>
+  </div>
+  <ol class="steps-list reveal" style="transition-delay: 0.15s">
+    <li class="step">
+      <span class="step-n">1</span>
+      <div class="step-text">
+        <strong>Preencha o formulário</strong>
+        <span>Nome, experiências, formação e habilidades.</span>
+      </div>
+    </li>
+    <li class="step">
+      <span class="step-n">2</span>
+      <div class="step-text">
+        <strong>Seu currículo é montado</strong>
+        <span>Os dados são organizados em um documento profissional.</span>
+      </div>
+    </li>
+    <li class="step">
+      <span class="step-n">3</span>
+      <div class="step-text">
+        <strong>Baixe em PDF</strong>
+        <span>Faça o download do seu currículo em PDF com um clique.</span>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+  <h2 class="reveal">Pronto para se<br><em>destacar</em>?</h2>
+  <p class="reveal" style="transition-delay: 0.1s">Crie seu currículo agora. É rápido, gratuito e sem cadastro.</p>
+  <a href="/curriculo" class="btn-primary reveal" style="display: inline-flex; transition-delay: 0.2s">
+    Criar meu currículo <span class="arrow">→</span>
+  </a>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer-section">
+  <div class="footer-logo">Currículo</div>
+  <span class="footer-note">Grátis · Sem cadastro</span>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  const observer = new IntersectionObserver(
+    (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+    { threshold: 0.15 }
+  );
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

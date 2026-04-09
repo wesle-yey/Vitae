@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Currículo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- pdfmake via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.min.js"></script>
+</head>
+<body class="form-page">
+
+<nav id="nav">
+  <div class="nav-logo"><a href="/">Currículo</a></div>
+</nav>
+
+<div class="container">
+  <h1>📄 Gerador de Currículo</h1>
+
+  <form id="form" novalidate>
+
+    <label>Nome completo *</label>
+    <input type="text" id="nome" placeholder="João da Silva">
+    <div class="err-msg" id="err-nome"></div>
+
+    <label>Cargo / título *</label>
+    <input type="text" id="cargo" placeholder="Desenvolvedor Full Stack">
+    <div class="err-msg" id="err-cargo"></div>
+
+    <div class="row">
+      <div>
+        <label>E-mail *</label>
+        <input type="email" id="email" placeholder="joao@email.com">
+        <div class="err-msg" id="err-email"></div>
+      </div>
+      <div>
+        <label>Telefone</label>
+        <input type="text" id="tel" placeholder="(11) 99999-9999">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Cidade / Estado</label>
+        <input type="text" id="cidade" placeholder="São Paulo, SP">
+      </div>
+      <div>
+        <label>LinkedIn</label>
+        <input type="text" id="linkedin" placeholder="linkedin.com/in/joao">
+      </div>
+    </div>
+
+    <label>Experiências profissionais *</label>
+    <textarea id="experiencias" rows="5" placeholder="Ex: Desenvolvedor na Empresa X (2020–2023): criei APIs REST, liderei equipe de 4 pessoas..."></textarea>
+    <div class="err-msg" id="err-exp"></div>
+
+    <label>Formação acadêmica *</label>
+    <textarea id="formacao" rows="3" placeholder="Ex: Bacharelado em Ciência da Computação — USP (2016–2020)"></textarea>
+    <div class="err-msg" id="err-form"></div>
+
+    <label>Habilidades</label>
+    <input type="text" id="skills" placeholder="JavaScript, React, Node.js, SQL, Inglês fluente...">
+
+    <label>Idioma do currículo</label>
+    <select id="idioma">
+      <option value="pt">Português</option>
+      <option value="en">Inglês</option>
+      <option value="es">Espanhol</option>
+    </select>
+
+    <button type="submit">Gerar currículo</button>
+  </form>
+
+  <!-- Resultado -->
+  <div id="resultado">
+    <h2>✅ Currículo gerado</h2>
+    <div id="cv-texto"></div>
+    <div class="botoes-dl">
+      <button id="btn-baixar">⬇ Baixar PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Dados do currículo (estado global) ──────────────────────
+let dadosCurriculo = null;
+
+// ── Validação ───────────────────────────────────────────────
+function validar() {
+  const campos = [
+    { id: 'nome',         err: 'err-nome',  msg: 'Informe seu nome' },
+    { id: 'cargo',        err: 'err-cargo', msg: 'Informe seu cargo' },
+    { id: 'email',        err: 'err-email', msg: 'Informe um e-mail válido',
+      fn: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
+    { id: 'experiencias', err: 'err-exp',   msg: 'Descreva suas experiências' },
+    { id: 'formacao',     err: 'err-form',  msg: 'Informe sua formação' },
+  ];
+
+  let ok = true;
+  for (const c of campos) {
+    const el    = document.getElementById(c.id);
+    const errEl = document.getElementById(c.err);
+    const valido = c.fn ? c.fn(el.value.trim()) : el.value.trim().length > 0;
+    errEl.textContent = valido ? '' : c.msg;
+    el.classList.toggle('error', !valido);
+    if (!valido) ok = false;
+  }
+  return ok;
+}
+
+// ── Pré-visualização em texto ────────────────────────────────
+function montarPreview(d) {
+  const sep = '──────────────────────────────────────';
+  const secoes = {
+    pt: { contato: 'CONTATO', exp: 'EXPERIÊNCIA PROFISSIONAL', form: 'FORMAÇÃO ACADÊMICA', hab: 'HABILIDADES' },
+    en: { contato: 'CONTACT',  exp: 'WORK EXPERIENCE',          form: 'EDUCATION',           hab: 'SKILLS'      },
+    es: { contato: 'CONTACTO', exp: 'EXPERIENCIA PROFESIONAL',  form: 'FORMACIÓN ACADÉMICA', hab: 'HABILIDADES' },
+  }[d.idioma];
+
+  let cv = '';
+  cv += d.nome.toUpperCase() + '\n';
+  cv += d.cargo + '\n';
+  cv += sep + '\n\n';
+  cv += secoes.contato + '\n';
+  cv += 'E-mail: ' + d.email + '\n';
+  if (d.tel)      cv += 'Telefone: '    + d.tel      + '\n';
+  if (d.cidade)   cv += 'Localização: ' + d.cidade   + '\n';
+  if (d.linkedin) cv += 'LinkedIn: '    + d.linkedin + '\n';
+  cv += '\n' + sep + '\n\n';
+  cv += secoes.exp + '\n';
+  cv += d.experiencias + '\n';
+  cv += '\n' + sep + '\n\n';
+  cv += secoes.form + '\n';
+  cv += d.formacao + '\n';
+  if (d.skills) {
+    cv += '\n' + sep + '\n\n';
+    cv += secoes.hab + '\n';
+    cv += d.skills + '\n';
+  }
+  return cv;
+}
+
+// ── Geração do PDF com pdfmake ───────────────────────────────
+function gerarPDF(d) {
+  const secoes = {
+    pt: { contato: 'CONTATO', exp: 'EXPERIÊNCIA PROFISSIONAL', form: 'FORMAÇÃO ACADÊMICA', hab: 'HABILIDADES' },
+    en: { contato: 'CONTACT',  exp: 'WORK EXPERIENCE',          form: 'EDUCATION',           hab: 'SKILLS'      },
+    es: { contato: 'CONTACTO', exp: 'EXPERIENCIA PROFESIONAL',  form: 'FORMACIÓN ACADÉMICA', hab: 'HABILIDADES' },
+  }[d.idioma];
+
+  // Monta bloco de contato
+  const contatoLinhas = ['E-mail: ' + d.email];
+  if (d.tel)      contatoLinhas.push('Telefone: ' + d.tel);
+  if (d.cidade)   contatoLinhas.push('Localização: ' + d.cidade);
+  if (d.linkedin) contatoLinhas.push('LinkedIn: ' + d.linkedin);
+
+  // Seção de habilidades (opcional)
+  const secaoHabilidades = d.skills ? [
+    { text: secoes.hab, style: 'sectionHeader', margin: [0, 18, 0, 6] },
+    { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 0.5, lineColor: '#cccccc' }] },
+    { text: d.skills, style: 'body', margin: [0, 8, 0, 0] }
+  ] : [];
+
+  const docDefinition = {
+    pageSize: 'A4',
+    pageMargins: [40, 50, 40, 50],
+
+    styles: {
+      nome: {
+        fontSize: 24,
+        bold: true,
+        color: '#161310',
+        characterSpacing: 1,
+      },
+      cargo: {
+        fontSize: 12,
+        color: '#c9973a',
+        margin: [0, 4, 0, 0],
+      },
+      sectionHeader: {
+        fontSize: 8,
+        bold: true,
+        color: '#8c7e74',
+        characterSpacing: 2,
+        margin: [0, 16, 0, 4],
+      },
+      body: {
+        fontSize: 10,
+        color: '#2a2420',
+        lineHeight: 1.6,
+      },
+      contactLine: {
+        fontSize: 10,
+        color: '#555',
+        lineHeight: 1.5,
+      },
+    },
+
+    defaultStyle: {
+      font: 'Roboto',
+    },
+
+    content: [
+      // Cabeçalho
+      { text: d.nome.toUpperCase(), style: 'nome' },
+      { text: d.cargo, style: 'cargo' },
+      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#c9973a' }], margin: [0, 12, 0, 0] },
+
+      // Contato
+      { text: secoes.contato, style: 'sectionHeader', margin: [0, 16, 0, 6] },
+      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 0.5, lineColor: '#cccccc' }] },
+      {
+        ul: contatoLinhas,
+        style: 'contactLine',
+        margin: [0, 8, 0, 0],
+        markerColor: '#c9973a',
+      },
+
+      // Experiência
+      { text: secoes.exp, style: 'sectionHeader', margin: [0, 18, 0, 6] },
+      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 0.5, lineColor: '#cccccc' }] },
+      { text: d.experiencias, style: 'body', margin: [0, 8, 0, 0] },
+
+      // Formação
+      { text: secoes.form, style: 'sectionHeader', margin: [0, 18, 0, 6] },
+      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 0.5, lineColor: '#cccccc' }] },
+      { text: d.formacao, style: 'body', margin: [0, 8, 0, 0] },
+
+      // Habilidades (condicional)
+      ...secaoHabilidades,
+    ],
+  };
+
+  const nomeArquivo = d.nome.toLowerCase().replace(/\s+/g, '_') + '_curriculo.pdf';
+  pdfMake.createPdf(docDefinition).download(nomeArquivo);
+}
+
+// ── Submit ───────────────────────────────────────────────────
+document.getElementById('form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (!validar()) return;
+
+  dadosCurriculo = {
+    nome:         document.getElementById('nome').value.trim(),
+    cargo:        document.getElementById('cargo').value.trim(),
+    email:        document.getElementById('email').value.trim(),
+    tel:          document.getElementById('tel').value.trim(),
+    cidade:       document.getElementById('cidade').value.trim(),
+    linkedin:     document.getElementById('linkedin').value.trim(),
+    experiencias: document.getElementById('experiencias').value.trim(),
+    formacao:     document.getElementById('formacao').value.trim(),
+    skills:       document.getElementById('skills').value.trim(),
+    idioma:       document.getElementById('idioma').value,
+  };
+
+  // Mostra pré-visualização em texto
+  document.getElementById('cv-texto').textContent = montarPreview(dadosCurriculo);
+
+  const resultado = document.getElementById('resultado');
+  resultado.style.display = 'block';
+  resultado.scrollIntoView({ behavior: 'smooth' });
+});
+
+// ── Botão de download PDF ────────────────────────────────────
+document.getElementById('btn-baixar').addEventListener('click', () => {
+  if (!dadosCurriculo) return;
+  gerarPDF(dadosCurriculo);
+});
+</script>
+
+</body>
+</html>
