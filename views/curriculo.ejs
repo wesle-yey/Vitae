@@ -56,11 +56,63 @@
     </div>
 
     <label>Experiências profissionais *</label>
-    <textarea id="experiencias" rows="5" placeholder="Ex: Desenvolvedor na Empresa X (2020–2023): criei APIs REST, liderei equipe de 4 pessoas..."></textarea>
+    <div id="experiencias-container" class="dynamic-container">
+      <div class="dynamic-item">
+        <div class="row">
+          <div>
+            <label class="sub-label">Cargo *</label>
+            <input type="text" class="exp-cargo" placeholder="Desenvolvedor Full Stack">
+          </div>
+          <div>
+            <label class="sub-label">Empresa *</label>
+            <input type="text" class="exp-empresa" placeholder="Empresa X">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label class="sub-label">Data de Início *</label>
+            <input type="date" class="exp-inicio">
+          </div>
+          <div>
+            <label class="sub-label">Data de Fim</label>
+            <input type="date" class="exp-fim">
+          </div>
+        </div>
+        <div>
+          <label class="sub-label">Descrição</label>
+          <textarea class="exp-descricao" rows="2" placeholder="Criei APIs REST, liderei equipe de 4 pessoas..."></textarea>
+        </div>
+      </div>
+    </div>
+    <button type="button" class="btn-add" id="btn-add-exp">+ Adicionar experiência</button>
     <div class="err-msg" id="err-exp"></div>
 
     <label>Formação acadêmica *</label>
-    <textarea id="formacao" rows="3" placeholder="Ex: Bacharelado em Ciência da Computação — USP (2016–2020)"></textarea>
+    <div id="formacao-container" class="dynamic-container">
+      <div class="dynamic-item">
+        <div class="row">
+          <div>
+            <label class="sub-label">Curso *</label>
+            <input type="text" class="form-curso" placeholder="Bacharelado em Ciência da Computação">
+          </div>
+          <div>
+            <label class="sub-label">Instituição *</label>
+            <input type="text" class="form-instituicao" placeholder="USP">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label class="sub-label">Data de Início *</label>
+            <input type="date" class="form-inicio">
+          </div>
+          <div>
+            <label class="sub-label">Data de Fim *</label>
+            <input type="date" class="form-fim">
+          </div>
+        </div>
+      </div>
+    </div>
+    <button type="button" class="btn-add" id="btn-add-form">+ Adicionar formação</button>
     <div class="err-msg" id="err-form"></div>
 
     <label>Habilidades</label>
@@ -92,17 +144,17 @@ let dadosCurriculo = null;
 
 // ── Validação ───────────────────────────────────────────────
 function validar() {
-  const campos = [
+  const camposBasicos = [
     { id: 'nome',         err: 'err-nome',  msg: 'Informe seu nome' },
     { id: 'cargo',        err: 'err-cargo', msg: 'Informe seu cargo' },
     { id: 'email',        err: 'err-email', msg: 'Informe um e-mail válido',
       fn: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) },
-    { id: 'experiencias', err: 'err-exp',   msg: 'Descreva suas experiências' },
-    { id: 'formacao',     err: 'err-form',  msg: 'Informe sua formação' },
   ];
 
   let ok = true;
-  for (const c of campos) {
+  
+  // Validar campos básicos
+  for (const c of camposBasicos) {
     const el    = document.getElementById(c.id);
     const errEl = document.getElementById(c.err);
     const valido = c.fn ? c.fn(el.value.trim()) : el.value.trim().length > 0;
@@ -110,6 +162,54 @@ function validar() {
     el.classList.toggle('error', !valido);
     if (!valido) ok = false;
   }
+
+  // Validar experiências
+  const expItens = document.querySelectorAll('#experiencias-container .dynamic-item');
+  const errExpEl = document.getElementById('err-exp');
+  let expValida = true;
+  expItens.forEach((item, idx) => {
+    const cargo = item.querySelector('.exp-cargo').value.trim();
+    const empresa = item.querySelector('.exp-empresa').value.trim();
+    const inicio = item.querySelector('.exp-inicio').value.trim();
+    
+    if (!cargo || !empresa || !inicio) {
+      expValida = false;
+    }
+  });
+  
+  if (expItens.length === 0) expValida = false;
+  
+  if (!expValida) {
+    errExpEl.textContent = 'Preencha pelo menos uma experiência completa (cargo, empresa e data de início)';
+    ok = false;
+  } else {
+    errExpEl.textContent = '';
+  }
+
+  // Validar formação
+  const formItens = document.querySelectorAll('#formacao-container .dynamic-item');
+  const errFormEl = document.getElementById('err-form');
+  let formValida = true;
+  formItens.forEach((item, idx) => {
+    const curso = item.querySelector('.form-curso').value.trim();
+    const instituicao = item.querySelector('.form-instituicao').value.trim();
+    const inicio = item.querySelector('.form-inicio').value.trim();
+    const fim = item.querySelector('.form-fim').value.trim();
+    
+    if (!curso || !instituicao || !inicio || !fim) {
+      formValida = false;
+    }
+  });
+  
+  if (formItens.length === 0) formValida = false;
+  
+  if (!formValida) {
+    errFormEl.textContent = 'Preencha pelo menos uma formação completa (curso, instituição e datas)';
+    ok = false;
+  } else {
+    errFormEl.textContent = '';
+  }
+
   return ok;
 }
 
@@ -133,10 +233,16 @@ function montarPreview(d) {
   if (d.linkedin) cv += 'LinkedIn: '    + d.linkedin + '\n';
   cv += '\n' + sep + '\n\n';
   cv += secoes.exp + '\n';
-  cv += d.experiencias + '\n';
+  d.experiencias.forEach(exp => {
+    const dataFim = exp.fim ? ' – ' + exp.fim : ' (em andamento)';
+    cv += exp.cargo + ' na ' + exp.empresa + ' (' + exp.inicio + dataFim + ')\n';
+    if (exp.descricao) cv += exp.descricao + '\n';
+  });
   cv += '\n' + sep + '\n\n';
   cv += secoes.form + '\n';
-  cv += d.formacao + '\n';
+  d.formacao.forEach(form => {
+    cv += form.curso + ' — ' + form.instituicao + ' (' + form.inicio + ' – ' + form.fim + ')\n';
+  });
   if (d.skills) {
     cv += '\n' + sep + '\n\n';
     cv += secoes.hab + '\n';
@@ -158,6 +264,19 @@ function gerarPDF(d) {
   if (d.tel)      contatoLinhas.push('Telefone: ' + d.tel);
   if (d.cidade)   contatoLinhas.push('Localização: ' + d.cidade);
   if (d.linkedin) contatoLinhas.push('LinkedIn: ' + d.linkedin);
+
+  // Monta seção de experiências
+  const expLinhas = d.experiencias.map(exp => {
+    const dataFim = exp.fim ? ' – ' + exp.fim : ' (em andamento)';
+    let texto = exp.cargo + ' na ' + exp.empresa + ' (' + exp.inicio + dataFim + ')';
+    if (exp.descricao) texto += '\n' + exp.descricao;
+    return texto;
+  });
+
+  // Monta seção de formação
+  const formLinhas = d.formacao.map(form => {
+    return form.curso + ' — ' + form.instituicao + ' (' + form.inicio + ' – ' + form.fim + ')';
+  });
 
   // Seção de habilidades (opcional)
   const secaoHabilidades = d.skills ? [
@@ -224,12 +343,22 @@ function gerarPDF(d) {
       // Experiência
       { text: secoes.exp, style: 'sectionHeader', margin: [0, 18, 0, 6] },
       { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 0.5, lineColor: '#cccccc' }] },
-      { text: d.experiencias, style: 'body', margin: [0, 8, 0, 0] },
+      {
+        ul: expLinhas,
+        style: 'body',
+        margin: [0, 8, 0, 0],
+        markerColor: '#c9973a',
+      },
 
       // Formação
       { text: secoes.form, style: 'sectionHeader', margin: [0, 18, 0, 6] },
       { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 0.5, lineColor: '#cccccc' }] },
-      { text: d.formacao, style: 'body', margin: [0, 8, 0, 0] },
+      {
+        ul: formLinhas,
+        style: 'body',
+        margin: [0, 8, 0, 0],
+        markerColor: '#c9973a',
+      },
 
       // Habilidades (condicional)
       ...secaoHabilidades,
@@ -240,10 +369,109 @@ function gerarPDF(d) {
   pdfMake.createPdf(docDefinition).download(nomeArquivo);
 }
 
+// ── Adicionar campos dinâmicos ──────────────────────────────
+function adicionarExperiencia() {
+  const container = document.getElementById('experiencias-container');
+  const novoItem = document.createElement('div');
+  novoItem.className = 'dynamic-item';
+  novoItem.innerHTML = `
+    <div class="row">
+      <div>
+        <label class="sub-label">Cargo *</label>
+        <input type="text" class="exp-cargo" placeholder="Desenvolvedor Full Stack">
+      </div>
+      <div>
+        <label class="sub-label">Empresa *</label>
+        <input type="text" class="exp-empresa" placeholder="Empresa X">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label class="sub-label">Data de Início *</label>
+        <input type="date" class="exp-inicio">
+      </div>
+      <div>
+        <label class="sub-label">Data de Fim</label>
+        <input type="date" class="exp-fim">
+      </div>
+    </div>
+    <div>
+      <label class="sub-label">Descrição</label>
+      <textarea class="exp-descricao" rows="2" placeholder="Criei APIs REST, liderei equipe de 4 pessoas..."></textarea>
+    </div>
+    <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕ Remover</button>
+  `;
+  container.appendChild(novoItem);
+}
+
+function adicionarFormacao() {
+  const container = document.getElementById('formacao-container');
+  const novoItem = document.createElement('div');
+  novoItem.className = 'dynamic-item';
+  novoItem.innerHTML = `
+    <div class="row">
+      <div>
+        <label class="sub-label">Curso *</label>
+        <input type="text" class="form-curso" placeholder="Bacharelado em Ciência da Computação">
+      </div>
+      <div>
+        <label class="sub-label">Instituição *</label>
+        <input type="text" class="form-instituicao" placeholder="USP">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label class="sub-label">Data de Início *</label>
+        <input type="date" class="form-inicio">
+      </div>
+      <div>
+        <label class="sub-label">Data de Fim *</label>
+        <input type="date" class="form-fim">
+      </div>
+    </div>
+    <button type="button" class="btn-remove" onclick="this.parentElement.remove()">✕ Remover</button>
+  `;
+  container.appendChild(novoItem);
+}
+
+// ── Event listeners para adicionar campos ────────────────────
+document.getElementById('btn-add-exp').addEventListener('click', (e) => {
+  e.preventDefault();
+  adicionarExperiencia();
+});
+
+document.getElementById('btn-add-form').addEventListener('click', (e) => {
+  e.preventDefault();
+  adicionarFormacao();
+});
+
 // ── Submit ───────────────────────────────────────────────────
 document.getElementById('form').addEventListener('submit', (e) => {
   e.preventDefault();
   if (!validar()) return;
+
+  // Coletar experiências
+  const experiencias = [];
+  document.querySelectorAll('#experiencias-container .dynamic-item').forEach(item => {
+    experiencias.push({
+      cargo: item.querySelector('.exp-cargo').value.trim(),
+      empresa: item.querySelector('.exp-empresa').value.trim(),
+      inicio: item.querySelector('.exp-inicio').value.trim(),
+      fim: item.querySelector('.exp-fim').value.trim(),
+      descricao: item.querySelector('.exp-descricao').value.trim(),
+    });
+  });
+
+  // Coletar formação
+  const formacao = [];
+  document.querySelectorAll('#formacao-container .dynamic-item').forEach(item => {
+    formacao.push({
+      curso: item.querySelector('.form-curso').value.trim(),
+      instituicao: item.querySelector('.form-instituicao').value.trim(),
+      inicio: item.querySelector('.form-inicio').value.trim(),
+      fim: item.querySelector('.form-fim').value.trim(),
+    });
+  });
 
   dadosCurriculo = {
     nome:         document.getElementById('nome').value.trim(),
@@ -252,8 +480,8 @@ document.getElementById('form').addEventListener('submit', (e) => {
     tel:          document.getElementById('tel').value.trim(),
     cidade:       document.getElementById('cidade').value.trim(),
     linkedin:     document.getElementById('linkedin').value.trim(),
-    experiencias: document.getElementById('experiencias').value.trim(),
-    formacao:     document.getElementById('formacao').value.trim(),
+    experiencias: experiencias,
+    formacao:     formacao,
     skills:       document.getElementById('skills').value.trim(),
     idioma:       document.getElementById('idioma').value,
   };
