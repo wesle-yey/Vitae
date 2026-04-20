@@ -193,8 +193,8 @@ function validar() {
   formItens.forEach((item, idx) => {
     const curso = item.querySelector('.form-curso').value.trim();
     const instituicao = item.querySelector('.form-instituicao').value.trim();
-    const inicio = item.querySelector('.form-inicio').value.trim();
-    const fim = item.querySelector('.form-fim').value.trim();
+    const inicio = item.querySelector('.form-inicio').value.trim().toLocaleDateString('pt-BR');
+    const fim = item.querySelector('.form-fim').value.trim().toLocaleDateString('pt-BR');
     
     if (!curso || !instituicao || !inicio || !fim) {
       formValida = false;
