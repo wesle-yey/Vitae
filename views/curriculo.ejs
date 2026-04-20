@@ -193,8 +193,8 @@ function validar() {
   formItens.forEach((item, idx) => {
     const curso = item.querySelector('.form-curso').value.trim();
     const instituicao = item.querySelector('.form-instituicao').value.trim();
-    const inicio = item.querySelector('.form-inicio').value.trim().toLocaleDateString('pt-BR');
-    const fim = item.querySelector('.form-fim').value.trim().toLocaleDateString('pt-BR');
+    const inicio = item.querySelector('.form-inicio').value.trim();
+    const fim = item.querySelector('.form-fim').value.trim();
     
     if (!curso || !instituicao || !inicio || !fim) {
       formValida = false;
@@ -211,6 +211,13 @@ function validar() {
   }
 
   return ok;
+}
+
+function formatDatePtBr(value) {
+  if (!value) return '';
+  const parts = value.split('-');
+  if (parts.length !== 3) return value;
+  return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
 
 // ── Pré-visualização em texto ────────────────────────────────
@@ -234,14 +241,14 @@ function montarPreview(d) {
   cv += '\n' + sep + '\n\n';
   cv += secoes.exp + '\n';
   d.experiencias.forEach(exp => {
-    const dataFim = exp.fim ? ' – ' + exp.fim : ' (em andamento)';
-    cv += exp.cargo + ' na ' + exp.empresa + ' (' + exp.inicio + dataFim + ')\n';
+    const dataFim = exp.fim ? ' – ' + formatDatePtBr(exp.fim) : ' (em andamento)';
+    cv += exp.cargo + ' na ' + exp.empresa + ' (' + formatDatePtBr(exp.inicio) + dataFim + ')\n';
     if (exp.descricao) cv += exp.descricao + '\n';
   });
   cv += '\n' + sep + '\n\n';
   cv += secoes.form + '\n';
   d.formacao.forEach(form => {
-    cv += form.curso + ' — ' + form.instituicao + ' (' + form.inicio + ' – ' + form.fim + ')\n';
+    cv += form.curso + ' — ' + form.instituicao + ' (' + formatDatePtBr(form.inicio) + ' – ' + formatDatePtBr(form.fim) + ')\n';
   });
   if (d.skills) {
     cv += '\n' + sep + '\n\n';
@@ -267,15 +274,15 @@ function gerarPDF(d) {
 
   // Monta seção de experiências
   const expLinhas = d.experiencias.map(exp => {
-    const dataFim = exp.fim ? ' – ' + exp.fim : ' (em andamento)';
-    let texto = exp.cargo + ' na ' + exp.empresa + ' (' + exp.inicio + dataFim + ')';
+    const dataFim = exp.fim ? ' – ' + formatDatePtBr(exp.fim) : ' (em andamento)';
+    let texto = exp.cargo + ' na ' + exp.empresa + ' (' + formatDatePtBr(exp.inicio) + dataFim + ')';
     if (exp.descricao) texto += '\n' + exp.descricao;
     return texto;
   });
 
   // Monta seção de formação
   const formLinhas = d.formacao.map(form => {
-    return form.curso + ' — ' + form.instituicao + ' (' + form.inicio + ' – ' + form.fim + ')';
+    return form.curso + ' — ' + form.instituicao + ' (' + formatDatePtBr(form.inicio) + ' – ' + formatDatePtBr(form.fim) + ')';
   });
 
   // Seção de habilidades (opcional)
