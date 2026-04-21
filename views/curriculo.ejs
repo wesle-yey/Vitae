@@ -213,20 +213,26 @@ function validar() {
   return ok;
 }
 
-function formatDatePtBr(value) {
+function formatDate(value, idioma) {
   if (!value) return '';
   const parts = value.split('-');
   if (parts.length !== 3) return value;
-  return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  if (idioma === 'en') {
+    // US format: MM/DD/YYYY
+    return `${parts[1]}/${parts[2]}/${parts[0]}`;
+  } else {
+    // Default to DD/MM/YYYY for pt and es
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
 }
 
 // ── Pré-visualização em texto ────────────────────────────────
 function montarPreview(d) {
   const sep = '──────────────────────────────────────';
   const secoes = {
-    pt: { contato: 'CONTATO', exp: 'EXPERIÊNCIA PROFISSIONAL', form: 'FORMAÇÃO ACADÊMICA', hab: 'HABILIDADES' },
-    en: { contato: 'CONTACT',  exp: 'WORK EXPERIENCE',          form: 'EDUCATION',           hab: 'SKILLS'      },
-    es: { contato: 'CONTACTO', exp: 'EXPERIENCIA PROFESIONAL',  form: 'FORMACIÓN ACADÉMICA', hab: 'HABILIDADES' },
+    pt: { contato: 'CONTATO', exp: 'EXPERIÊNCIA PROFISSIONAL', form: 'FORMAÇÃO ACADÊMICA', hab: 'HABILIDADES', andamento: '(em andamento)', at: 'na', email: 'E-mail: ', telefone: 'Telefone: ', localizacao: 'Localização: ', linkedin: 'LinkedIn: ' },
+    en: { contato: 'CONTACT',  exp: 'WORK EXPERIENCE',          form: 'EDUCATION',           hab: 'SKILLS',      andamento: '(ongoing)',      at: 'at', email: 'Email: ',    telefone: 'Phone: ',     localizacao: 'Location: ',   linkedin: 'LinkedIn: ' },
+    es: { contato: 'CONTACTO', exp: 'EXPERIENCIA PROFESIONAL',  form: 'FORMACIÓN ACADÉMICA', hab: 'HABILIDADES', andamento: '(en curso)',     at: 'en', email: 'Correo: ',  telefone: 'Teléfono: ',  localizacao: 'Ubicación: ',  linkedin: 'LinkedIn: ' },
   }[d.idioma];
 
   let cv = '';
@@ -234,21 +240,21 @@ function montarPreview(d) {
   cv += d.cargo + '\n';
   cv += sep + '\n\n';
   cv += secoes.contato + '\n';
-  cv += 'E-mail: ' + d.email + '\n';
-  if (d.tel)      cv += 'Telefone: '    + d.tel      + '\n';
-  if (d.cidade)   cv += 'Localização: ' + d.cidade   + '\n';
-  if (d.linkedin) cv += 'LinkedIn: '    + d.linkedin + '\n';
+  cv += secoes.email + d.email + '\n';
+  if (d.tel)      cv += secoes.telefone    + d.tel      + '\n';
+  if (d.cidade)   cv += secoes.localizacao + d.cidade   + '\n';
+  if (d.linkedin) cv += secoes.linkedin    + d.linkedin + '\n';
   cv += '\n' + sep + '\n\n';
   cv += secoes.exp + '\n';
   d.experiencias.forEach(exp => {
-    const dataFim = exp.fim ? ' – ' + formatDatePtBr(exp.fim) : ' (em andamento)';
-    cv += exp.cargo + ' na ' + exp.empresa + ' (' + formatDatePtBr(exp.inicio) + dataFim + ')\n';
+    const dataFim = exp.fim ? ' – ' + formatDate(exp.fim, d.idioma) : ' ' + secoes.andamento;
+    cv += exp.cargo + ' ' + secoes.at + ' ' + exp.empresa + ' (' + formatDate(exp.inicio, d.idioma) + dataFim + ')\n';
     if (exp.descricao) cv += exp.descricao + '\n';
   });
   cv += '\n' + sep + '\n\n';
   cv += secoes.form + '\n';
   d.formacao.forEach(form => {
-    cv += form.curso + ' — ' + form.instituicao + ' (' + formatDatePtBr(form.inicio) + ' – ' + formatDatePtBr(form.fim) + ')\n';
+    cv += form.curso + ' — ' + form.instituicao + ' (' + formatDate(form.inicio, d.idioma) + ' – ' + formatDate(form.fim, d.idioma) + ')\n';
   });
   if (d.skills) {
     cv += '\n' + sep + '\n\n';
@@ -261,28 +267,28 @@ function montarPreview(d) {
 // ── Geração do PDF com pdfmake ───────────────────────────────
 function gerarPDF(d) {
   const secoes = {
-    pt: { contato: 'CONTATO', exp: 'EXPERIÊNCIA PROFISSIONAL', form: 'FORMAÇÃO ACADÊMICA', hab: 'HABILIDADES' },
-    en: { contato: 'CONTACT',  exp: 'WORK EXPERIENCE',          form: 'EDUCATION',           hab: 'SKILLS'      },
-    es: { contato: 'CONTACTO', exp: 'EXPERIENCIA PROFESIONAL',  form: 'FORMACIÓN ACADÉMICA', hab: 'HABILIDADES' },
+    pt: { contato: 'CONTATO', exp: 'EXPERIÊNCIA PROFISSIONAL', form: 'FORMAÇÃO ACADÊMICA', hab: 'HABILIDADES', andamento: '(em andamento)', at: 'na', email: 'E-mail: ', telefone: 'Telefone: ', localizacao: 'Localização: ', linkedin: 'LinkedIn: ' },
+    en: { contato: 'CONTACT',  exp: 'WORK EXPERIENCE',          form: 'EDUCATION',           hab: 'SKILLS',      andamento: '(ongoing)',      at: 'at', email: 'Email: ',    telefone: 'Phone: ',     localizacao: 'Location: ',   linkedin: 'LinkedIn: ' },
+    es: { contato: 'CONTACTO', exp: 'EXPERIENCIA PROFESIONAL',  form: 'FORMACIÓN ACADÉMICA', hab: 'HABILIDADES', andamento: '(en curso)',     at: 'en', email: 'Correo: ',  telefone: 'Teléfono: ',  localizacao: 'Ubicación: ',  linkedin: 'LinkedIn: ' },
   }[d.idioma];
 
   // Monta bloco de contato
-  const contatoLinhas = ['E-mail: ' + d.email];
-  if (d.tel)      contatoLinhas.push('Telefone: ' + d.tel);
-  if (d.cidade)   contatoLinhas.push('Localização: ' + d.cidade);
-  if (d.linkedin) contatoLinhas.push('LinkedIn: ' + d.linkedin);
+  const contatoLinhas = [secoes.email + d.email];
+  if (d.tel)      contatoLinhas.push(secoes.telefone + d.tel);
+  if (d.cidade)   contatoLinhas.push(secoes.localizacao + d.cidade);
+  if (d.linkedin) contatoLinhas.push(secoes.linkedin + d.linkedin);
 
   // Monta seção de experiências
   const expLinhas = d.experiencias.map(exp => {
-    const dataFim = exp.fim ? ' – ' + formatDatePtBr(exp.fim) : ' (em andamento)';
-    let texto = exp.cargo + ' na ' + exp.empresa + ' (' + formatDatePtBr(exp.inicio) + dataFim + ')';
+    const dataFim = exp.fim ? ' – ' + formatDate(exp.fim, d.idioma) : ' ' + secoes.andamento;
+    let texto = exp.cargo + ' ' + secoes.at + ' ' + exp.empresa + ' (' + formatDate(exp.inicio, d.idioma) + dataFim + ')';
     if (exp.descricao) texto += '\n' + exp.descricao;
     return texto;
   });
 
   // Monta seção de formação
   const formLinhas = d.formacao.map(form => {
-    return form.curso + ' — ' + form.instituicao + ' (' + formatDatePtBr(form.inicio) + ' – ' + formatDatePtBr(form.fim) + ')';
+    return form.curso + ' — ' + form.instituicao + ' (' + formatDate(form.inicio, d.idioma) + ' – ' + formatDate(form.fim, d.idioma) + ')';
   });
 
   // Seção de habilidades (opcional)
