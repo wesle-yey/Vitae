@@ -39,7 +39,6 @@ app.use((req, res, next) => {
 })
 
 app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: '1d', // Cache por 1 dia
   etag: false   // Desativa ETags para mais segurança
 }))
 
