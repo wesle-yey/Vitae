@@ -151,14 +151,26 @@ nav.scrolled {
 
 .hero-deco {
   position: absolute;
-  right: 48px; bottom: 60px;
-  font-family: 'Playfair Display', serif;
-  font-size: 11rem;
-  font-weight: 900;
-  color: rgba(42, 36, 32, 0.04);
-  line-height: 1;
+  right: 50px; bottom: 50px;
+  width: 800px;
+  max-width: calc(100vw - 120px);
+  height: auto;
   user-select: none;
   pointer-events: none;
+  box-shadow: 0 32px 80px rgba(42, 36, 32, 0.15), 0 8px 24px rgba(201, 151, 58, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid rgba(201, 151, 58, 0.15);
+  animation: slideInRight 0.8s 0.5s ease forwards;
+  opacity: 0;
+}
+
+.hero-deco img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  object-fit: cover;
 }
 
 /* ── BOTÃO PRIMÁRIO ── */
@@ -361,7 +373,7 @@ nav.scrolled {
 }
 
 .container {
-  max-width: 640px;
+  max-width: 540px;
   margin: 0 auto;
   background: #fff;
   border-radius: 8px;
@@ -437,7 +449,7 @@ button[type="submit"]:hover { background: var(--blue2); }
   font-size: 0.82rem;
   line-height: 1.7;
   white-space: pre-wrap;
-  max-height: 360px;
+  max-height: 500px;
   overflow-y: auto;
 }
 
@@ -538,6 +550,11 @@ button[type="submit"]:hover { background: var(--blue2); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(24px);
@@ -554,7 +571,9 @@ button[type="submit"]:hover { background: var(--blue2); }
   .hero, .features, .how,
   .cta-section, .footer-section { padding-left: 24px; padding-right: 24px; }
   .hero::before                { display: none; }
-  .hero-deco                   { display: none; }
+  .hero-deco                   { position: static; width: 400px; height: auto; 
+                                 right: auto; bottom: auto; margin: 40px auto 0; 
+                                 box-shadow: 0 20px 56px rgba(42, 36, 32, 0.12), 0 6px 18px rgba(201, 151, 58, 0.08); }
   .features-grid               { grid-template-columns: 1fr; }
   .how                         { grid-template-columns: 1fr; gap: 40px; }
   .row                         { grid-template-columns: 1fr; }
