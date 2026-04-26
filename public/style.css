@@ -89,7 +89,7 @@ nav.scrolled {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 120px 48px 80px;
+  padding: 70px 48px 80px;
   position: relative;
   border-bottom: 1px solid var(--line);
 }
@@ -151,10 +151,13 @@ nav.scrolled {
 
 .hero-deco {
   position: absolute;
-  right: 50px; bottom: 50px;
-  width: 800px;
+  left: 50%;
+  top: 10%;
+  width: 700px;
   max-width: calc(100vw - 120px);
+  transform: translate(-50%, -50%);
   height: auto;
+  max-height: 560px;
   user-select: none;
   pointer-events: none;
   box-shadow: 0 32px 80px rgba(42, 36, 32, 0.15), 0 8px 24px rgba(201, 151, 58, 0.1);
@@ -170,7 +173,7 @@ nav.scrolled {
   height: auto;
   display: block;
   border-radius: 12px;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 /* ── BOTÃO PRIMÁRIO ── */
