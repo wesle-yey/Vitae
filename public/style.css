@@ -89,9 +89,10 @@ nav.scrolled {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 70px 48px 80px;
+  padding: 70px 64px 80px;
   position: relative;
   border-bottom: 1px solid var(--line);
+  overflow-x: hidden;
 }
 
 .hero::before {
@@ -154,8 +155,8 @@ nav.scrolled {
   left: 50%;
   top: 10%;
   width: 700px;
-  max-width: calc(100vw - 120px);
-  transform: translate(-50%, -50%);
+  max-width: calc(100vw - 128px);
+  transform: translateX(-50%);
   height: auto;
   max-height: 560px;
   user-select: none;
@@ -572,9 +573,9 @@ button[type="submit"]:hover { background: var(--blue2); }
 @media (max-width: 700px) {
   nav                          { padding: 18px 24px; }
   .hero, .features, .how,
-  .cta-section, .footer-section { padding-left: 24px; padding-right: 24px; }
+  .cta-section, .footer-section { padding-left: 32px; padding-right: 32px; }
   .hero::before                { display: none; }
-  .hero-deco                   { position: static; width: 400px; height: auto; 
+  .hero-deco                   { position: static; width: min(400px, calc(100vw - 64px)); max-width: 100%; height: auto; 
                                  right: auto; bottom: auto; margin: 40px auto 0; 
                                  box-shadow: 0 20px 56px rgba(42, 36, 32, 0.12), 0 6px 18px rgba(201, 151, 58, 0.08); }
   .features-grid               { grid-template-columns: 1fr; }
